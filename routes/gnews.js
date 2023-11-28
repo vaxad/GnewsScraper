@@ -86,7 +86,7 @@ router.get('/topic/:term', async (req, res) => {
     const $ = cheerio.load(data)
     // console.log($.html())
     let nest=""
-    if(url===india){
+    if(url===india || url===world){
         nest="c-wiz div main c-wiz c-wiz c-wiz c-wiz"
     }else{
         nest="c-wiz div main c-wiz div c-wiz c-wiz c-wiz"
