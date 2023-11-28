@@ -15,6 +15,7 @@ const science = 'https://news.google.com/topics/CAAqKggKIiRDQkFTRlFvSUwyMHZNRFp0
 
 //search
 router.get('/search/:term', async (req, res) => {
+    try {
     const url = `https://news.google.com/search?q=${req.params.term}&hl=en-IN&gl=IN&ceid=IN%3Aen`
 
     const { data } = await axios.get(url, {
@@ -40,9 +41,14 @@ router.get('/search/:term', async (req, res) => {
 
     // res.send(pretty(list.html()))
     res.json({ news: news, total: news.length })
+} catch (error) {
+    console.log(error)
+    res.json({ news: [], total: 0 })
+}
 })
 
 router.get('/topic/:term', async (req, res) => {
+    try {
     const term = req.params.term
     
     let url = india
@@ -78,7 +84,14 @@ router.get('/topic/:term', async (req, res) => {
         }
     })
     const $ = cheerio.load(data)
-    const list = $("c-wiz div main c-wiz div c-wiz c-wiz c-wiz").children("div:first-child").children("article:first-child")
+    // console.log($.html())
+    let nest=""
+    if(url===india){
+        nest="c-wiz div main c-wiz c-wiz c-wiz c-wiz"
+    }else{
+        nest="c-wiz div main c-wiz div c-wiz c-wiz c-wiz"
+    }
+    const list = $(nest).children("div:first-child").children("article:first-child")
     const news = []
     list.each((idx, el) => {
         const i = $(el).children("figure").children("img").attr("srcset")
@@ -93,6 +106,11 @@ router.get('/topic/:term', async (req, res) => {
     })
     // res.send(pretty(list.html()))
     res.json({ news: news, total: news.length })
+} catch (error) {
+    console.log(error)
+    res.json({ news: [], total: 0 })
+        
+}
 })
 
 
