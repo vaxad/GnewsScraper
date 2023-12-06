@@ -17,29 +17,40 @@ const science = 'https://news.google.com/topics/CAAqKggKIiRDQkFTRlFvSUwyMHZNRFp0
 router.get('/search/:term', async (req, res) => {
     try {
     const url = `https://news.google.com/search?q=${req.params.term}&hl=en-IN&gl=IN&ceid=IN%3Aen`
-
+        console.log("hooi")
     const { data } = await axios.get(url, {
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'
         }
     })
     const $ = cheerio.load(data)
-    const list = $("c-wiz div div div main").find("div.NiLAwe")
+    const list = $("c-wiz div main div c-wiz c-wiz c-wiz article")
 
     const news = []
+
     list.each((idx, el) => {
-        const title = $(el).find("article.MQsxIb").first().children("h3").children("a").text().trim()
-        const time = $(el).find("article.MQsxIb").first().find("time.WW6dff ").text()
-        const simg = $(el).find("article.MQsxIb").first().children("div").children("img").last().attr("srcset")
-        const sourceImg = simg?.split(' ')
-        const name = $(el).find("article.MQsxIb").first().children("div").children("div").children("a").text()
-        const i = $(el).find("figure.AZtY5d").children("img").attr("srcset")
-        const img = i?.split(' ')
-        const link = ('https://news.google.com' + ($(el).find("article.MQsxIb").children("a").attr("href").slice(1)))
-        news.push({ link, time, title, img, source: { img: sourceImg, name } })
+        const title = $(el).children("div").children("div").children("div").children("a").children("h4").text().trim()
+        console.log(title+"\n\n")
+        
+        
+        const time = $(el).children("div").children("time").text()
+        const date = $(el).children("div").children("time").attr("datetime")
+        const authorScraped = $(el).children("div").children("div").children("span").first().text()
+        const author = authorScraped !== '' ? authorScraped : "Anonymous"
+        const i = $(el).children("div").children("figure").children("img").last().attr("srcset")
+        const imgs = i?.split(' ')
+        const img = imgs?[imgs[0], imgs[2]]:["https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png","https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png"]
+        
+        const name = $(el).children("div").children("div").children("div").children("div").children("div").children("div").children("div").text()
+        const scrapedSourceImage = $(el).children("div").children("div").children("div").children("div").children("img").attr("srcset")
+        const sourceImg = scrapedSourceImage?[scrapedSourceImage?.split(' ')[0], scrapedSourceImage?.split(' ')[2]]:["https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png","https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png"]
+        
+        const link = ('https://news.google.com' + ($(el).children("div").children("div").children("a").attr("href").slice(1)))
+        
+        news.push({ link, time, title, img, date, author, source: { img: sourceImg, name } })
+        console.log({ link, time, title, img, date, author, source: { img: sourceImg, name } })
     })
 
-    // res.send(pretty(list.html()))
     res.json({ news: news, total: news.length })
 } catch (error) {
     console.log(error)
@@ -84,7 +95,7 @@ router.get('/topic/:term', async (req, res) => {
         }
     })
     const $ = cheerio.load(data)
-    // console.log($.html())
+    
     let nest=""
     if(url===india || url===world){
         nest="c-wiz div main c-wiz c-wiz c-wiz c-wiz"
@@ -95,15 +106,20 @@ router.get('/topic/:term', async (req, res) => {
     const news = []
     list.each((idx, el) => {
         const i = $(el).children("figure").children("img").attr("srcset")
-        const img = i ? i.split(' ') : i
+        const img = i ?  [i.split(' ')[0],i.split(' ')[2]] : ["https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png","https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png"]
         const sImg = $(el).children("div").children("div").children("img").attr("srcset")
-        const sourceImg = sImg ? sImg.split(' ') : sImg
-        const sourceName = $(el).children("div").children("div").children("div").children("div").text().trim()
+        const sourceImg = sImg ? [sImg.split(' ')[0],sImg.split(' ')[2]] : ["https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png","https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png"]
+        const scrapedSourceName = $(el).children("div").children("div").children("div").children("div").text().trim()
+        const sourceName = scrapedSourceName !==''? scrapedSourceName : "Anonymous"
         const link = 'https://news.google.com' + $(el).children("div").children("a.WwrzSb").attr("href").slice(1)
         const time = $(el).children("div").children("time").text().trim()
+        const date = $(el).children("div").children("time").attr("datetime")
         const title = $(el).children("a").text().trim()
-        // console.log(title)
-        news.push({ title: title, link: link, time: time, img: img, source: { img: sourceImg, name: sourceName } })
+        const authorScraped = $(el).children("div").children("div").children("span").first().text()
+        const author = authorScraped !== '' ? authorScraped : "Anonymous"
+
+        news.push({ title: title, link: link, time: time, date: date, img: img, author:author, source: { img: sourceImg, name: sourceName } })
+        console.log({ link, time, title, img, date, author, source: { img: sourceImg, name: sourceName } })
     })
     // res.send(pretty(list.html()))
     res.json({ news: news, total: news.length })
