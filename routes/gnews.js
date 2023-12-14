@@ -29,7 +29,7 @@ router.get('/search/:term', async (req, res) => {
         const news = []
 
         list.each((idx, el) => {
-            const title = $(el).children("div").children("div").children("div").children("a").children("h4").text().trim()
+            const title = $(el).children("div").children("div").children("div").children("a").text().trim()
 
             const time = $(el).children("div").children("time").text()
             const date = $(el).children("div").children("time").attr("datetime")
