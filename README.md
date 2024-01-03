@@ -12,13 +12,13 @@ The GNews Scraping API is a Node.js server-side application designed to scrape n
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/vaxad/news-api.git
+   git clone https://github.com/vaxad/GnewsScraper.git
    ```
 
 2. Install dependencies:
 
    ```bash
-   cd news-api-main
+   cd GnewsScraper-main
    npm install
    ```
 
